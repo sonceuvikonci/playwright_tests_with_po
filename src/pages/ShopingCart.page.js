@@ -3,9 +3,13 @@ const { BaseSwagLabPage } = require('./BaseSwagLab.page');
 export class ShopingCartPage extends BaseSwagLabPage {
     url = '/cart.html';
 
+    allItemsInCart = [];
+
     cartItemSelector = '.cart_item';
 
     removeItemSelector = '[id^="remove"]';
+
+    checkoutBtnSelector = '[id^="checkout"]';
 
     get headerTitle() { return this.page.locator('.title'); }
 
@@ -21,5 +25,13 @@ export class ShopingCartPage extends BaseSwagLabPage {
 
     async removeCartItemById(id) {
         await this.cartItems.nth(id).locator(this.removeItemSelector).click();
+    }
+
+    async getAllItemsInCart() {
+        this.allItemsInCart = await this.collectAllProductToList();
+    }
+
+    async clickCheckoutBtn() {
+        return this.page.locator(this.checkoutBtnSelector).click();
     }
 }
