@@ -10,7 +10,7 @@ export class CheckoutStepOnePage extends BasePage {
     get continueBtn() { return this.page.locator('#continue'); }
 
 
-    async fillCheckoutForm(firstName, lastName, zipCode) {
+    async fillFormWithDataAndSubmit(firstName, lastName, zipCode) {
         await this.firstName.fill(firstName);
         await this.lastName.fill(lastName);
         await this.zipCode.fill(zipCode);

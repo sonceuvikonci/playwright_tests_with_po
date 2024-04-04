@@ -1,5 +1,3 @@
-require('../globalPrototype');
-
 const { getRandomUniqueNumbersArray } = require('../Helper');
 
 const { BaseSwagLabPage } = require('./BaseSwagLab.page');
@@ -7,9 +5,7 @@ const { BaseSwagLabPage } = require('./BaseSwagLab.page');
 export class InventoryPage extends BaseSwagLabPage {
     url = '/inventory.html';
 
-    selectedItems = [];
-
-    get headerTitle() { return this.page.locator('.title'); } //
+    get headerTitle() { return this.page.locator('.title'); }
 
     get inventoryItems() { return this.page.locator('.inventory_item'); }
 
@@ -17,31 +13,66 @@ export class InventoryPage extends BaseSwagLabPage {
 
     get filterItems() { return this.page.locator('select.product_sort_container'); }
 
-    get itemPrice() { return this.page.locator('.inventory_item_price'); }
+    inventoryItemName = '.inventory_item_name';
+
+    inventoryItemDescription = '.inventory_item_desc';
+
+    inventoryItemPrice = '.inventory_item_price';
 
     async addItemToCartById(id) {
         await this.inventoryItems.nth(id).locator('[id^="add-to-cart"]').click();
     }
 
-    async addRandomItemsToCart(numberOfItems) {
-        await this.fillSelectedItemsWithRandomItems(numberOfItems);
-        await this.selectedItems.forEachAsync((item) => this.addItemToCartById(item.id));
-        // delete item.id to avoid its check in result item object
-        this.selectedItems.map((item) => delete item.id);
+    async addRandomItemsToCart(numberOfItems = 2) {
+        const randomItemsIndex = getRandomUniqueNumbersArray(numberOfItems);
+        const itemsToAddInCart = [];
+
+        for (let i = 0; i < randomItemsIndex.length; i += 1) {
+            itemsToAddInCart.push(
+                {
+                    name: await this.inventoryItems.nth(randomItemsIndex[i])
+                        .locator(this.inventoryItemName).textContent(),
+                    description: await this.inventoryItems.nth(randomItemsIndex[i])
+                        .locator(this.inventoryItemDescription).textContent(),
+                    price: await this.inventoryItems.nth(randomItemsIndex[i])
+                        .locator(this.inventoryItemPrice).textContent(),
+                },
+            );
+            await this.addItemToCartById(randomItemsIndex[i]);
+        }
+        return itemsToAddInCart;
     }
 
-    async fillSelectedItemsWithRandomItems(numberOfItems) {
-        const randomItemsIds = getRandomUniqueNumbersArray(numberOfItems);
-        this.selectedItems = await this.collectProductsWithIdsToList(randomItemsIds);
+    async openShoppingCart() {
+        await this.shopingCart.click();
     }
 
-    async filterItemByPriceAsc() {
-        await this.filterItems.selectOption('Price (low to high)');
+    async filterItemsBy(criteria) {
+        await this.filterItems.selectOption(criteria);
     }
 
-    async verifyItemsSortedByPrice() {
-        const itemPrices = await this.page.locator(this.inventoryItemPrice).allTextContents();
-        const parsedPrices = itemPrices.map((element) => parseFloat(element.replace('$', '')));
-        return parsedPrices.every((value, index, array) => index === 0 || value >= array[index - 1]);
+    async verifyItemsSortedBy(criteria) {
+        let prices;
+        let parsedPrices;
+        let names;
+        if (criteria === 'Price (low to high)') {
+            prices = await this.page.locator(this.inventoryItemPrice).allTextContents();
+            parsedPrices = prices.map((element) => parseFloat(element.replace('$', '')));
+            return parsedPrices.every((value, index, array) => index === 0 || value >= array[index - 1]);
+        }
+        if (criteria === 'Price (high to low)') {
+            prices = await this.page.locator(this.inventoryItemPrice).allTextContents();
+            parsedPrices = prices.map((element) => parseFloat(element.replace('$', '')));
+            return parsedPrices.every((value, index, array) => index === 0 || value <= array[index - 1]);
+        }
+        if (criteria === 'Name (A to Z)') {
+            names = await this.page.locator(this.inventoryItemName).allTextContents();
+            return JSON.stringify(names) === JSON.stringify(names.sort((a, b) => a - b));
+        }
+        if (criteria === 'Name (Z to A)') {
+            names = await this.page.locator(this.inventoryItemName).allTextContents();
+            return JSON.stringify(names) === JSON.stringify(names.sort((a, b) => b - a));
+        }
+        return null;
     }
 }

@@ -1,7 +1,13 @@
 const { BaseSwagLabPage } = require('./BaseSwagLab.page');
 
 export class CheckoutStepTwoPage extends BaseSwagLabPage {
-    allItems = [];
+    cartItemSelector = '.cart_item';
+
+    inventoryItemName = '.inventory_item_name';
+
+    inventoryItemDescription = '.inventory_item_desc';
+
+    inventoryItemPrice = '.inventory_item_price';
 
     get itemPrice() { return this.page.locator('.inventory_item_price'); }
 
@@ -9,26 +15,29 @@ export class CheckoutStepTwoPage extends BaseSwagLabPage {
 
     get tax() { return this.page.locator('.summary_tax_label'); }
 
-    async displayedPrice() {
+    async getTotalPrice() {
         const totalPrice = await this.totalPrice.textContent();
-        return totalPrice.replace('Total: $', '').trim();
+        return parseFloat(totalPrice.replace('Total: $', '').trim());
     }
 
-    async calculatedPrice() {
-        const prices = await this.itemPrice.allTextContents();
-        const parsedCalcPrices = prices.map((price) => parseFloat(price.replace('$', '').trim()));
-        const pricesSum = parsedCalcPrices.reduce((sum, price) => sum + price, 0);
-
+    async getTax() {
         const taxValue = await this.tax.textContent();
-        const parsedTaxValue = parseFloat(taxValue.replace('Tax: $', '').trim());
-
-        return (pricesSum + parsedTaxValue).toString();
+        return parseFloat(taxValue.replace('Tax: $', '').trim());
     }
 
-    async allItemsOnChekout() {
-        if (this.allItems.leght === 0) {
-            this.allItems = await this.collectAllProductToList();
+    async getAllInventoryItems() {
+        const items = this.page.locator(this.cartItemSelector);
+        const itemsCount = await items.count();
+        const allItems = [];
+        for (let i = 0; i < itemsCount; i += 1) {
+            allItems.push(
+                {
+                    name: await items.nth(i).locator(this.inventoryItemName).textContent(),
+                    description: await items.nth(i).locator(this.inventoryItemDescription).textContent(),
+                    price: await items.nth(i).locator(this.inventoryItemPrice).textContent(),
+                },
+            );
         }
-        return this.allItems;
+        return allItems;
     }
 }
