@@ -27,6 +27,7 @@ module.exports = {
     rules: {
         'import/prefer-default-export': 'off',
         'linebreak-style': 'off',
+        'no-await-in-loop': 'off',
         indent: [
             'error',
             4,
