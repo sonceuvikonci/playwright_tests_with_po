@@ -1,14 +1,13 @@
 const { BasePage } = require('./Base.page');
 
 export class CheckoutStepOnePage extends BasePage {
-    get firstName() { return this.page.locator('#first-name'); }
-
-    get lastName() { return this.page.locator('#last-name'); }
-
-    get zipCode() { return this.page.locator('#postal-code'); }
-
-    get continueBtn() { return this.page.locator('#continue'); }
-
+    constructor(page) {
+        super(page);
+        this.firstName = this.page.locator('#first-name');
+        this.lastName = this.page.locator('#last-name');
+        this.zipCode = this.page.locator('#postal-code');
+        this.continueBtn = this.page.locator('#continue');
+    }
 
     async fillFormWithDataAndSubmit(firstName, lastName, zipCode) {
         await this.firstName.fill(firstName);
