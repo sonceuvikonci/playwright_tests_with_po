@@ -1,10 +1,7 @@
 export class BasePage {
-    url = '';
-
-    page;
-
     constructor(page) {
         this.page = page;
+        this.url = '';
     }
 
     // async below added to show the function returns a promise

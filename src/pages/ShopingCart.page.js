@@ -1,25 +1,34 @@
 const { BaseSwagLabPage } = require('./BaseSwagLab.page');
 
 export class ShopingCartPage extends BaseSwagLabPage {
-    url = '/cart.html';
+    constructor(page) {
+        super(page);
+        this.url = '/cart.html';
+        this.removeItem = this.page.locator('[id^="remove"]');
+        this.checkoutBtn = this.page.locator('[id^="checkout"]');
+        this.itemPrice = this.page.locator('.inventory_item_price');
+    }
 
-    cartItemSelector = '.cart_item';
-
-    removeItemSelector = '[id^="remove"]';
-
-    get headerTitle() { return this.page.locator('.title'); }
-
-    get cartItems() { return this.page.locator(this.cartItemSelector); }
-
-    // async below added to show the function returns a promise
-    async getCartItemByName(name) { return this.page.locator(this.cartItemSelector, { hasText: name }); }
+    async getCartItemByName(name) {
+        return this.items.filter({ hasText: name });
+    }
 
     async removeCartItemByName(name) {
         const item = await this.getCartItemByName(name);
-        return item.locator(this.removeItemSelector);
+        return item.locator(this.removeItem);
     }
 
     async removeCartItemById(id) {
-        await this.cartItems.nth(id).locator(this.removeItemSelector).click();
+        await this.items.nth(id).locator(this.removeItem).click();
+    }
+
+    async getTotalPriceItemsAddedToCart() {
+        const prices = await this.items.allTextContents();
+        const parsedCalcPrices = prices.map((price) => parseFloat(price.replace('[^\\d.]', '')));
+        return parsedCalcPrices.reduce((sum, price) => sum + price, 0);
+    }
+
+    async goToCheckoutStep() {
+        return this.checkoutBtn.click();
     }
 }

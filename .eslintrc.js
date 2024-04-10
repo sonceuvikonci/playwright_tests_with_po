@@ -25,6 +25,10 @@ module.exports = {
         ecmaVersion: 'latest',
     },
     rules: {
+        'import/prefer-default-export': 'off',
+        'linebreak-style': 'off',
+        'no-await-in-loop': 'off',
+        'no-restricted-syntax': 'off',
         indent: [
             'error',
             4,
