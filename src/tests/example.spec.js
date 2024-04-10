@@ -1,6 +1,7 @@
 // @ts-check
 const { expect } = require('@playwright/test');
 const { test } = require('../fixture');
+const { sortArrayBy } = require('../Helper');
 
 test.beforeEach(async ({ loginPage }) => {
     await loginPage.navigate();
@@ -24,11 +25,12 @@ test.describe('Saucedemo tests', () => {
         await expect(shopingCartPage.items).not.toBeAttached();
     });
 
-    const filterCriteria = ['Price (low to high)', 'Price (high to low)', 'Name (A to Z)', 'Name (Z to A)'];
-    for (const criteria of filterCriteria) {
-        test(`Filter products on Inventory page ${criteria}`, async ({ inventoryPage }) => {
-            await inventoryPage.filterItemsBy(criteria);
-            expect(await inventoryPage.verifyItemsSortedBy(criteria), `Items should be sorted by ${criteria}`).toBeTruthy();
+    const sortingCriteria = ['Price (low to high)', 'Price (high to low)', 'Name (A to Z)', 'Name (Z to A)'];
+    for (const criterion of sortingCriteria) {
+        test(`Sorting products on Inventory page ${criterion}`, async ({ inventoryPage }) => {
+            const itemsOnPage = await inventoryPage.sortItemsBy(criterion);
+            const sortedItems = sortArrayBy(itemsOnPage, criterion);
+            expect(itemsOnPage).toEqual(sortedItems);
         });
     }
 

@@ -8,3 +8,24 @@ export function getRandomUniqueNumbersArray(max) {
     }
     return randomNumArr;
 }
+
+export function sortArrayBy(array, criteria) {
+    const arrayToSort = array;
+    switch (criteria) {
+        case 'Price (low to high)':
+            arrayToSort.every((value, index, arr) => index === 0 || value >= arr[index - 1]);
+            break;
+        case 'Price (high to low)':
+            arrayToSort.every((value, index, arr) => index === 0 || value <= arr[index - 1]);
+            break;
+        case 'Name (A to Z)':
+            arrayToSort.sort();
+            break;
+        case 'Name (Z to A)':
+            arrayToSort.sort().reverse();
+            break;
+        default:
+            throw new Error('Incorrect sorting criteria!');
+    }
+    return arrayToSort;
+}
